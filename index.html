@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Маркетплейс чійхва</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg-main: #121316;
+      --bg-card: #1c1e24;
+      --text-main: #f0f2f5;
+      --text-muted: #9a9caf;
+      --accent: #4e83fd;
+      --border: #2d313e;
+      --steam-blue: #66c0f4;
+      --steam-bg: #171a21;
+    }
+
+    body.light-theme {
+      --bg-main: #f4f5f7;
+      --bg-card: #ffffff;
+      --text-main: #1e1e1e;
+      --text-muted: #707070;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg-main); color: var(--text-main); line-height: 1.5; padding-bottom: 40px; }
+
+    .wrap { max-width: 98%; margin: 0 auto; padding: 0 16px; }
+
+    /* Шапка */
+    header { background: var(--bg-card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; gap: 16px; flex-wrap: wrap; }
+    .brand { font-size: 1.8rem; font-weight: 700; color: var(--text-main); text-decoration: none; }
+    .brand span { color: var(--accent); }
+
+    .search-bar { flex-grow: 1; max-width: 600px; display: flex; }
+    .search-bar input { width: 100%; padding: 10px 16px; border: 2px solid var(--accent); background: var(--bg-main); color: var(--text-main); border-radius: 8px 0 0 8px; outline: none; }
+    .search-bar button { background: var(--accent); color: white; border: none; padding: 0 20px; border-radius: 0 8px 8px 0; cursor: pointer; font-weight: 600; }
+
+    .controls { display: flex; gap: 10px; align-items: center; }
+    .btn { background: var(--bg-main); color: var(--text-main); border: 1px solid var(--border); padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .btn:hover { border-color: var(--accent); }
+
+    /* Лейаут */
+    .marketplace-layout { display: grid; grid-template-columns: 240px 1fr; gap: 20px; margin-top: 20px; }
+    @media (max-width: 868px) { .marketplace-layout { grid-template-columns: 1fr; } }
+
+    /* Сайдбар */
+    .categories-sidebar { background: var(--bg-card); border-radius: 12px; padding: 16px; border: 1px solid var(--border); height: fit-content; }
+    .category-list { list-style: none; }
+    .category-list li a { display: flex; justify-content: space-between; padding: 10px; color: var(--text-main); text-decoration: none; border-radius: 6px; font-size: 0.9rem; }
+    .category-list li a:hover { background: var(--bg-main); color: var(--accent); }
+
+    .promo-banner { background: linear-gradient(90deg, #2b32b2, #1488cc); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+
+    /* АДАПТИВНА СІТКА */
+    .products-grid { display: grid; gap: 16px; width: 100%; }
+    @media (min-width: 0px) { .products-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 768px) { .products-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 1024px) { .products-grid { grid-template-columns: repeat(5, 1fr); } }
+    @media (min-width: 1600px) { .products-grid { grid-template-columns: repeat(6, 1fr); } }
+    @media (min-width: 2200px) { .products-grid { grid-template-columns: repeat(8, 1fr); } }
+
+    /* Картки товарів */
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-img-wrap {
+      width: 100%;
+      height: 150px;
+      background: var(--bg-main);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .product-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 10px;
+      transition: transform 0.3s ease;
+    }
+    .product-card:hover .product-img-wrap img {
+      transform: scale(1.08);
+    }
+
+    .product-status {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      width: fit-content;
+    }
+
+    .product-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      height: 2.8em;
+    }
+
+    .product-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .product-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .price { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .buy-btn { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: background 0.2s; }
+    .buy-btn:hover { opacity: 0.9; }
+
+    /* Steam мега-лот */
+    .product-card.steam-mega-lot { grid-column: 1 / -1; background: var(--steam-bg); border: 2px solid var(--steam-blue); color: white; box-shadow: 0 0 15px rgba(102, 192, 244, 0.2); }
+    .product-card.steam-mega-lot .price { color: var(--steam-blue); font-size: 1.4rem; }
+    .product-card.steam-mega-lot .buy-btn { background: var(--steam-blue); color: #000; }
+
+    .load-more-container { text-align: center; margin-top: 24px; grid-column: 1 / -1; }
+
+    /* Модальне вікно кошика */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--bg-card); border: 1px solid var(--border); padding: 24px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .close-btn { cursor: pointer; font-size: 1.5rem; background: none; border: none; color: var(--text-main); }
+    .cart-items-list { overflow-y: auto; flex-grow: 1; margin-bottom: 16px; }
+    .cart-line { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .cart-line-title { font-weight: 600; }
+    .cart-line-price { color: var(--accent); font-weight: 700; }
+    .cart-line-remove { color: #ff4d4d; background: none; border: none; cursor: pointer; margin-left: 10px; }
+    .cart-empty { color: var(--text-muted); text-align: center; }
+    .cart-footer { border-top: 1px solid var(--border); padding-top: 12px; display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="wrap header-top">
+      <a href="#" class="brand">чійхва<span>.ua</span></a>
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Пошук серед 500 унікальних товарів...">
+        <button>Знайти</button>
+      </div>
+      <div class="controls">
+        <button class="btn" id="theme-toggle">☀️ Світла</button>
+        <button class="btn" id="open-cart-btn">🛒 Кошик (<span id="cart-count">0</span>)</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap marketplace-layout">
+    <aside class="categories-sidebar">
+      <h3>Категорії</h3>
+      <ul class="category-list">
+        <li><a href="#" data-category="Всі">Всі товари <span id="total-count">500</span></a></li>
+        <li><a href="#" data-category="Автотовари">Автотовари <span>100</span></a></li>
+        <li><a href="#" data-category="Товари для дому">Товари для дому <span>100</span></a></li>
+        <li><a href="#" data-category="Електроніка та ПК">Електроніка та ПК <span>100</span></a></li>
+        <li><a href="#" data-category="Велотовари">Велотовари <span>100</span></a></li>
+        <li><a href="#" data-category="Різне">Різне <span>100</span></a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <div class="promo-banner">
+        <h2>Маркетплейс чійхва</h2>
+        <p>Каталог з 500 унікальних товарів, адаптивною сіткою та робочим кошиком</p>
+      </div>
+
+      <div class="products-grid" id="products-grid"></div>
+      
+      <div class="load-more-container">
+        <button class="btn" id="load-more-btn" style="background: var(--accent); color: white; border: none; display: none;">Завантажити ще</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Модальне вікно кошика -->
+  <div class="modal" id="cart-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Ваш кошик</h3>
+        <button class="close-btn" id="close-cart-btn">&times;</button>
+      </div>
+      <div class="cart-items-list" id="cart-items">
+        <div class="cart-empty">Кошик порожній</div>
+      </div>
+      <div class="cart-footer">
+        <div>Разом: <strong id="cart-total">0 ₴</strong></div>
+        <button class="btn" style="background: var(--accent); color: white; border: none;" onclick="alert('Дякуємо за замовлення!')">Оформити</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const categories = ['Автотовари', 'Товари для дому', 'Електроніка та ПК', 'Велотовари', 'Різне'];
+    const prefixes = ['Преміум', 'Професійний', 'Універсальний', 'Компактний', 'Посилений', 'Смарт', 'Бездротовий'];
+
+    const baseProducts = {
+      'Автотовари': ['Автомобільний компресор', 'Набір інструментів', 'Відеореєстратор', 'Освіжувач повітря', 'Чохли на сидіння', 'Пусковий пристрій', 'Олива моторна 5W-30', 'Очисник скла', 'Автомобільний пилосос', 'Трос буксирувальний'],
+      'Товари для дому': ['Робот-пилосос', 'Світлодіодна лампа', 'Зволожувач повітря', 'Набір каструль з граніту', 'Органайзер для речей', 'Ковдра всесезонна', 'Електрочайник', 'Млин для спецій', 'Кухонний блендер', 'Сушарка для білизни'],
+      'Електроніка та ПК': ['Механічна клавіатура', 'Бездротова миша', 'Монітор 27 IPS', 'SSD накопичувач 1TB', 'Кабель Type-C 2м', 'Навушники з ANC', 'Графічний планшет', 'Оперативна память 16GB', 'Кулер для процесора', 'Веб-камера Full HD'],
+      'Велотовари': ['Велосипедний ліхтар', 'Замок для велосипеда', 'Шолом захисний', 'Насос підлоговий', 'Велокомпютер', 'Сумка на раму', 'Педалі алюмінієві', 'Набір латок для камер', 'Фляготримач', 'Мастило для ланцюга'],
+      'Різне': ['Рюкзак міський', 'Термос 1L', 'Ліхтарик акумуляторний', 'Павербанк 20000mAh', 'Парасолька-автомат', 'Настільна лампа', 'Мультитул 12 в 1', 'Туристичний килимок', 'Спортивна пляшка', 'Електронна книга']
+    };
+
+    const svgIcons = {
+      ram: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%234e83fd' stroke-width='2'><rect x='2' y='6' width='20' height='12' rx='2'/><line x1='6' y1='10' x2='6' y2='14'/><line x1='10' y1='10' x2='10' y2='14'/><line x1='14' y1='10' x2='14' y2='14'/><line x1='18' y1='10' x2='18' y2='14'/></svg>",
+      monitor: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%234e83fd' stroke-width='2'><rect x='2' y='3' width='20' height='14' rx='2'/><line x1='8' y1='21' x2='16' y2='21'/><line x1='12' y1='17' x2='12' y2='21'/></svg>",
+      keyboard: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%234e83fd' stroke-width='2'><rect x='2' y='4' width='20' height='16' rx='2'/><path d='M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10'/></svg>",
+      mouse: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%234e83fd' stroke-width='2'><rect x='7' y='3' width='10' height='18' rx='5'/><line x1='12' y1='3' x2='12' y2='9'/></svg>",
+      patches: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='M9 12l2 2 4-4'/></svg>",
+      pump: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%234e83fd' stroke-width='2'><path d='M10 2h4v20h-4z'/><path d='M6 6h12'/><path d='M12 2v6'/><path d='M4 22h16'/></svg>",
+      auto: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2'><path d='M5 17h14v-4l-2-5H7l-2 5v4z'/><circle cx='7.5' cy='17.5' r='2.5'/><circle cx='16.5' cy='17.5' r='2.5'/></svg>",
+      bike: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'><circle cx='5.5' cy='17.5' r='3.5'/><circle cx='18.5' cy='17.5' r='3.5'/><path d='M15 6.5H9l-3 11M15 6.5h3l3 11M15 6.5l-3 11'/></svg>",
+      home: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23ec4899' stroke-width='2'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/></svg>",
+      pc: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%238b5cf6' stroke-width='2'><rect x='2' y='2' width='20' height='8' rx='2'/><rect x='2' y='14' width='20' height='8' rx='2'/><line x1='6' y1='6' x2='6.01' y2='6'/><line x1='6' y1='18' x2='6.01' y2='18'/></svg>",
+      misc: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'><path d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/></svg>"
+    };
+
+    function getProductImage(name, category) {
+      const lower = name.toLowerCase();
+      if (lower.includes('оперативн') || lower.includes('память') || lower.includes('ddr')) return svgIcons.ram;
+      if (lower.includes('монітор')) return svgIcons.monitor;
+      if (lower.includes('клавіатур')) return svgIcons.keyboard;
+      if (lower.includes('миша')) return svgIcons.mouse;
+      if (lower.includes('латок') || lower.includes('ремкомплект')) return svgIcons.patches;
+      if (lower.includes('насос')) return svgIcons.pump;
+
+      if (category === 'Автотовари') return svgIcons.auto;
+      if (category === 'Велотовари') return svgIcons.bike;
+      if (category === 'Товари для дому') return svgIcons.home;
+      if (category === 'Електроніка та ПК') return svgIcons.pc;
+      return svgIcons.misc;
+    }
+
+    const products = [
+      {
+        id: 1,
+        title: 'Цифрова платформа Steam (Всі права, сервери, Valve та ігри)',
+        category: 'Ексклюзив',
+        price: 20000000000000,
+        isSteam: true,
+        sku: 'STEAM-20T',
+        image: svgIcons.pc
+      }
+    ];
+
+    for (let i = 2; i <= 500; i++) {
+      const category = categories[i % categories.length];
+      const itemsList = baseProducts[category];
+      
+      const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+      const name = itemsList[Math.floor(Math.random() * itemsList.length)];
+      const modelCode = Math.floor(1000 + Math.random() * 9000);
+      const price = Math.floor(Math.random() * 4900) + 99;
+      const title = `${prefix} ${name} v${modelCode}`;
+
+      products.push({
+        id: i,
+        title: title,
+        category: category,
+        price: price,
+        isSteam: false,
+        sku: `CHJ-${i}`,
+        image: getProductImage(title, category)
+      });
+    }
+
+    let cart = [];
+    let currentCategory = 'Всі';
+    let searchQuery = '';
+    let visibleCount = 30;
+
+    function renderProducts() {
+      const container = document.getElementById('products-grid');
+      const countBadge = document.getElementById('total-count');
+      if (!container) return;
+
+      const filtered = products.filter(p => {
+        const matchCategory = currentCategory === 'Всі' || p.category === currentCategory;
+        const matchSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchCategory && matchSearch;
+      });
+
+      if (countBadge) countBadge.innerText = filtered.length;
+
+      const displayProducts = filtered.slice(0, visibleCount);
+
+      container.innerHTML = displayProducts.map(p => {
+        if (p.isSteam) {
+          return `
+            <div class="product-card steam-mega-lot">
+              <div>
+                <span class="product-status" style="color: var(--steam-blue); background: rgba(102, 192, 244, 0.1);">★ Всі права та сервери</span>
+                <div class="product-img-wrap"><img src="${p.image}" alt="${p.title}"></div>
+                <div class="product-title" style="height: auto; font-size: 1.1rem; margin-top: 4px;">${p.title}</div>
+                <div class="product-meta">Артикул: ${p.sku}</div>
+              </div>
+              <div class="product-bottom" style="margin-top: 16px;">
+                <div class="price">${p.price.toLocaleString('uk-UA')} ₴</div>
+                <button class="buy-btn" onclick="addToCart(${p.id})">Придбати Steam</button>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="product-card">
+            <div>
+              <div class="product-img-wrap">
+                <img src="${p.image}" alt="${p.title}">
+              </div>
+              <span class="product-status">В наявності</span>
+              <div class="product-title">${p.title}</div>
+              <div class="product-meta">Код: ${p.sku} | ${p.category}</div>
+            </div>
+            <div class="product-bottom">
+              <div class="price">${p.price.toLocaleString('uk-UA')} ₴</div>
+              <button class="buy-btn" onclick="addToCart(${p.id})">Купити</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const loadMoreBtn = document.getElementById('load-more-btn');
+      if (loadMoreBtn) {
+        loadMoreBtn.style.display = visibleCount < filtered.length ? 'block' : 'none';
+      }
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      if (product) {
+        cart.push(product);
+        updateCartUI();
+      }
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const cartCount = document.getElementById('cart-count');
+      const cartItemsContainer = document.getElementById('cart-items');
+      const cartTotal = document.getElementById('cart-total');
+
+      if (cartCount) cartCount.innerText = cart.length;
+
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      if (cartTotal) cartTotal.innerText = `${total.toLocaleString('uk-UA')} ₴`;
+
+      if (cartItemsContainer) {
+        if (cart.length === 0) {
+          cartItemsContainer.innerHTML = '<div class="cart-empty">Кошик порожній</div>';
+        } else {
+          cartItemsContainer.innerHTML = cart.map((item, index) => `
+            <div class="cart-line">
+              <div>
+                <div class="cart-line-title">${item.title}</div>
+                <div class="cart-line-price">${item.price.toLocaleString('uk-UA')} ₴</div>
+              </div>
+              <button class="cart-line-remove" onclick="removeFromCart(${index})">Видалити</button>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProducts();
+
+      const themeBtn = document.getElementById('theme-toggle');
+      const savedTheme = localStorage.getItem('chijhva-theme') || 'dark';
+      if (savedTheme === 'light') document.body.classList.add('light-theme');
+      if (themeBtn) themeBtn.innerText = savedTheme === 'light' ? '🌙 Темна' : '☀️ Світла';
+
+      themeBtn.addEventListener('click', () => {
+        const isLight = document.body.classList.toggle('light-theme');
+        localStorage.setItem('chijhva-theme', isLight ? 'light' : 'dark');
+        themeBtn.innerText = isLight ? '🌙 Темна' : '☀️ Світла';
+      });
+
+      const modal = document.getElementById('cart-modal');
+      document.getElementById('open-cart-btn').addEventListener('click', () => modal.classList.add('active'));
+      document.getElementById('close-cart-btn').addEventListener('click', () => modal.classList.remove('active'));
+
+      document.getElementById('search-input').addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        visibleCount = 30;
+        renderProducts();
+      });
+
+      document.getElementById('load-more-btn').addEventListener('click', () => {
+        visibleCount += 30;
+        renderProducts();
+      });
+
+      document.querySelectorAll('.category-list a').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentCategory = link.dataset.category || 'Всі';
+          visibleCount = 30;
+          renderProducts();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
